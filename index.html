@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="." />
+    <title>Inventory Management System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+  <div class="header">
+    <h1>Inventory Management System</h1>
+    <div class="user-controls">
+      <div id="user-info">
+        Logged in as: <span id="current-user">Head Of Department</span>
+        | Location: <span id="current-location">Not Selected</span>
+      </div>
+      <button class="logout-btn" onclick="inventorySystem.logout()">Logout</button>
+    </div>
+  </div>
+  
+  <div class="container">
+    <div class="grid">
+      <div class="card">
+        <h2>Add New Item</h2>
+        <form id="asset-form">
+          <div class="form-group">
+            <label for="asset-name">Item Name</label>
+            <input type="text" id="asset-name" required>
+          </div>
+          <div class="form-group">
+            <label for="category">Category</label>
+            <select id="category" required>
+              <option value="">Select Category</option>
+              <option value="IT Equipment">IT Equipment</option>
+              <option value="Furniture">Furniture</option>
+              <option value="Stationery">Stationery</option>
+              <option value="Special Equipment">Special Equipment</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="asset-quantity">Quantity</label>
+            <input type="number" id="asset-quantity" min="1" value="1" required>
+          </div>
+          <div class="form-group">
+            <label for="asset-price">Purchase Price (₦)</label>
+            <input type="number" id="asset-price" min="5000" step="100" required>
+          </div>
+          <button type="submit">Add Item</button>
+        </form>
+      </div>
+  
+      <div class="card">
+        <h2>Inventory Activity</h2>
+        <div class="form-group">
+          <label for="activity-start-date">From:</label>
+          <input type="date" id="activity-start-date" onchange="inventorySystem.filterActivityLog()">
+        </div>
+        <div class="form-group">
+          <label for="activity-end-date">To:</label>
+          <input type="date" id="activity-end-date" onchange="inventorySystem.filterActivityLog()">
+        </div>
+        <div class="audit-log" id="audit-log">
+          <div>Login required to view activity log</div>
+        </div>
+      </div>
+    </div>
+  
+    <div class="card" style="margin-top: 2rem;">
+      <h2>Inventory</h2>
+      
+      <div class="inventory-controls">
+        <div class="form-group">
+          <label for="category-filter">Select Category:</label>
+          <select id="category-filter" onchange="inventorySystem.filterByCategory()">
+            <option value="all">All Categories</option>
+            <option value="IT Equipment">IT Equipment</option>
+            <option value="Furniture">Furniture</option>
+            <option value="Stationery">Stationery</option>
+            <option value="Special Equipment">Special Equipment</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="item-search">Search Items:</label>
+          <input type="text" id="item-search" placeholder="Search by ID, name, or status..." 
+            oninput="inventorySystem.searchItems()">
+        </div>
+      </div>
+  
+      <table id="inventory-table">
+        <thead>
+          <tr>
+            <th>Item ID</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Purchase Price (₦)</th>
+            <th>Status</th>
+            <th>Date Added</th>
+            <th>Last Updated</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="inventory-body">
+          <!-- Inventory items will be added here -->
+          <tr>
+            <td>ICIT0001</td>
+            <td>Dell Laptop</td>
+            <td>IT Equipment</td>
+            <td>${350000.toLocaleString()}</td>
+            <td><span class="status-badge status-active">active</span></td>
+            <td>${new Date('2024-01-01T00:00:00.000Z').toLocaleDateString()}</td>
+            <td>${new Date().toLocaleDateString()}</td>
+            <td class="action-buttons">
+              <button onclick="inventorySystem.toggleItemStatus('ICIT0001')">Mark Damaged</button>
+              <button onclick="inventorySystem.showLendModal('ICIT0001')">Lend Out</button>
+              <button onclick="inventorySystem.deleteItem('ICIT0001')">Delete</button>
+            </td>
+          </tr>
+          <tr>
+            <td>ICIT0002</td>
+            <td>HP Printer</td>
+            <td>IT Equipment</td>
+            <td>${150000.toLocaleString()}</td>
+            <td><span class="status-badge status-active">active</span></td>
+            <td>${new Date('2024-01-01T00:00:00.000Z').toLocaleDateString()}</td>
+            <td>${new Date().toLocaleDateString()}</td>
+            <td class="action-buttons">
+              <button onclick="inventorySystem.toggleItemStatus('ICIT0002')">Mark Damaged</button>
+              <button onclick="inventorySystem.showLendModal('ICIT0002')">Lend Out</button>
+              <button onclick="inventorySystem.deleteItem('ICIT0002')">Delete</button>
+            </td>
+          </tr>
+          <tr>
+            <td>ICFU0001</td>
+            <td>Executive Chair</td>
+            <td>Furniture</td>
+            <td>${45000.toLocaleString()}</td>
+            <td><span class="status-badge status-active">active</span></td>
+            <td>${new Date('2024-01-01T00:00:00.000Z').toLocaleDateString()}</td>
+            <td>${new Date().toLocaleDateString()}</td>
+            <td class="action-buttons">
+              <button onclick="inventorySystem.toggleItemStatus('ICFU0001')">Mark Damaged</button>
+              <button onclick="inventorySystem.showLendModal('ICFU0001')">Lend Out</button>
+              <button onclick="inventorySystem.deleteItem('ICFU0001')">Delete</button>
+            </td>
+          </tr>
+          <tr>
+            <td>ICFU0002</td>
+            <td>Filing Cabinet</td>
+            <td>Furniture</td>
+            <td>${60000.toLocaleString()}</td>
+            <td><span class="status-badge status-active">active</span></td>
+            <td>${new Date('2024-01-01T00:00:00.000Z').toLocaleDateString()}</td>
+            <td>${new Date().toLocaleDateString()}</td>
+            <td class="action-buttons">
+              <button onclick="inventorySystem.toggleItemStatus('ICFU0002')">Mark Damaged</button>
+              <button onclick="inventorySystem.showLendModal('ICFU0002')">Lend Out</button>
+              <button onclick="inventorySystem.deleteItem('ICFU0002')">Delete</button>
+            </td>
+          </tr>
+          <tr>
+            <td>ICST0001</td>
+            <td>Paper Ream</td>
+            <td>Stationery</td>
+            <td>${3000.toLocaleString()}</td>
+            <td><span class="status-badge status-active">active</span></td>
+            <td>${new Date('2024-01-01T00:00:00.000Z').toLocaleDateString()}</td>
+            <td>${new Date().toLocaleDateString()}</td>
+            <td class="action-buttons">
+              <button onclick="inventorySystem.toggleItemStatus('ICST0001')">Mark Damaged</button>
+              <button onclick="inventorySystem.showLendModal('ICST0001')">Lend Out</button>
+              <button onclick="inventorySystem.deleteItem('ICST0001')">Delete</button>
+            </td>
+          </tr>
+          <tr>
+            <td>ICST0002</td>
+            <td>Stapler Set</td>
+            <td>Stationery</td>
+            <td>${1500.toLocaleString()}</td>
+            <td><span class="status-badge status-active">active</span></td>
+            <td>${new Date('2024-01-01T00:00:00.000Z').toLocaleDateString()}</td>
+            <td>${new Date().toLocaleDateString()}</td>
+            <td class="action-buttons">
+              <button onclick="inventorySystem.toggleItemStatus('ICST0002')">Mark Damaged</button>
+              <button onclick="inventorySystem.showLendModal('ICST0002')">Lend Out</button>
+              <button onclick="inventorySystem.deleteItem('ICST0002')">Delete</button>
+            </td>
+          </tr>
+          <tr>
+            <td>ICEQ0001</td>
+            <td>Projector</td>
+            <td>Special Equipment</td>
+            <td>${200000.toLocaleString()}</td>
+            <td><span class="status-badge status-active">active</span></td>
+            <td>${new Date('2024-01-01T00:00:00.000Z').toLocaleDateString()}</td>
+            <td>${new Date().toLocaleDateString()}</td>
+            <td class="action-buttons">
+              <button onclick="inventorySystem.toggleItemStatus('ICEQ0001')">Mark Damaged</button>
+              <button onclick="inventorySystem.showLendModal('ICEQ0001')">Lend Out</button>
+              <button onclick="inventorySystem.deleteItem('ICEQ0001')">Delete</button>
+            </td>
+          </tr>
+          <tr>
+            <td>ICEQ0002</td>
+            <td>Scanner</td>
+            <td>Special Equipment</td>
+            <td>${70000.toLocaleString()}</td>
+            <td><span class="status-badge status-active">active</span></td>
+            <td>${new Date('2024-01-01T00:00:00.000Z').toLocaleDateString()}</td>
+            <td>${new Date().toLocaleDateString()}</td>
+            <td class="action-buttons">
+              <button onclick="inventorySystem.toggleItemStatus('ICEQ0002')">Mark Damaged</button>
+              <button onclick="inventorySystem.showLendModal('ICEQ0002')">Lend Out</button>
+              <button onclick="inventorySystem.deleteItem('ICEQ0002')">Delete</button>
+            </td>
+          </tr>
+          <tr>
+            <td>AHIT0001</td>
+            <td>Desktop Computer</td>
+            <td>IT Equipment</td>
+            <td>${400000.toLocaleString()}</td>
+            <td><span class="status-badge status-active">active</span></td>
+            <td>${new Date('2024-01-01T00:00:00.000Z').toLocaleDateString()}</td>
+            <td>${new Date().toLocaleDateString()}</td>
+            <td class="action-buttons">
+              <button onclick="inventorySystem.toggleItemStatus('AHIT0001')">Mark Damaged</button>
+              <button onclick="inventorySystem.showLendModal('AHIT0001')">Lend Out</button>
+              <button onclick="inventorySystem.deleteItem('AHIT0001')">Delete</button>
+            </td>
+          </tr>
+          <tr>
+            <td>AHFU0001</td>
+            <td>Office Desk</td>
+            <td>Furniture</td>
+            <td>${80000.toLocaleString()}</td>
+            <td><span class="status-badge status-active">active</span></td>
+            <td>${new Date('2024-01-01T00:00:00.000Z').toLocaleDateString()}</td>
+            <td>${new Date().toLocaleDateString()}</td>
+            <td class="action-buttons">
+              <button onclick="inventorySystem.toggleItemStatus('AHFU0001')">Mark Damaged</button>
+              <button onclick="inventorySystem.showLendModal('AHFU0001')">Lend Out</button>
+              <button onclick="inventorySystem.deleteItem('AHFU0001')">Delete</button>
+            </td>
+          </tr>
+          <tr>
+            <td>AHST0001</td>
+            <td>File Folders</td>
+            <td>Stationery</td>
+            <td>${2000.toLocaleString()}</td>
+            <td><span class="status-badge status-active">active</span></td>
+            <td>${new Date('2024-01-01T00:00:00.000Z').toLocaleDateString()}</td>
+            <td>${new Date().toLocaleDateString()}</td>
+            <td class="action-buttons">
+              <button onclick="inventorySystem.toggleItemStatus('AHST0001')">Mark Damaged</button>
+              <button onclick="inventorySystem.showLendModal('AHST0001')">Lend Out</button>
+              <button onclick="inventorySystem.deleteItem('AHST0001')">Delete</button>
+            </td>
+          </tr>
+          <tr>
+            <td>AHEQ0001</td>
+            <td>Paper Shredder</td>
+            <td>Special Equipment</td>
+            <td>${150000.toLocaleString()}</td>
+            <td><span class="status-badge status-active">active</span></td>
+            <td>${new Date('2024-01-01T00:00:00.000Z').toLocaleDateString()}</td>
+            <td>${new Date().toLocaleDateString()}</td>
+            <td class="action-buttons">
+              <button onclick="inventorySystem.toggleItemStatus('AHEQ0001')">Mark Damaged</button>
+              <button onclick="inventorySystem.showLendModal('AHEQ0001')">Lend Out</button>
+              <button onclick="inventorySystem.deleteItem('AHEQ0001')">Delete</button>
+            </td>
+          </tr>
+          <tr>
+            <td>PAIT0001</td>
+            <td>Laptop</td>
+            <td>IT Equipment</td>
+            <td>${300000.toLocaleString()}</td>
+            <td><span class="status-badge status-active">active</span></td>
+            <td>${new Date('2024-01-01T00:00:00.000Z').toLocaleDateString()}</td>
+            <td>${new Date().toLocaleDateString()}</td>
+            <td class="action-buttons">
+              <button onclick="inventorySystem.toggleItemStatus('PAIT0001')">Mark Damaged</button>
+              <button onclick="inventorySystem.showLendModal('PAIT0001')">Lend Out</button>
+              <button onclick="inventorySystem.deleteItem('PAIT0001')">Delete</button>
+            </td>
+          </tr>
+          <tr>
+            <td>PAFU0001</td>
+            <td>Conference Table</td>
+            <td>Furniture</td>
+            <td>${120000.toLocaleString()}</td>
+            <td><span class="status-badge status-active">active</span></td>
+            <td>${new Date('2024-01-01T00:00:00.000Z').toLocaleDateString()}</td>
+            <td>${new Date().toLocaleDateString()}</td>
+            <td class="action-buttons">
+              <button onclick="inventorySystem.toggleItemStatus('PAFU0001')">Mark Damaged</button>
+              <button onclick="inventorySystem.showLendModal('PAFU0001')">Lend Out</button>
+              <button onclick="inventorySystem.deleteItem('PAFU0001')">Delete</button>
+            </td>
+          </tr>
+          <tr>
+            <td>PAST0001</td>
+            <td>Notepads</td>
+            <td>Stationery</td>
+            <td>${1000.toLocaleString()}</td>
+            <td><span class="status-badge status-active">active</span></td>
+            <td>${new Date('2024-01-01T00:00:00.000Z').toLocaleDateString()}</td>
+            <td>${new Date().toLocaleDateString()}</td>
+            <td class="action-buttons">
+              <button onclick="inventorySystem.toggleItemStatus('PAST0001')">Mark Damaged</button>
+              <button onclick="inventorySystem.showLendModal('PAST0001')">Lend Out</button>
+              <button onclick="inventorySystem.deleteItem('PAST0001')">Delete</button>
+            </td>
+          </tr>
+          <tr>
+            <td>PAEQ0001</td>
+            <td>Digital Camera</td>
+            <td>Special Equipment</td>
+            <td>${250000.toLocaleString()}</td>
+            <td><span class="status-badge status-active">active</span></td>
+            <td>${new Date('2024-01-01T00:00:00.000Z').toLocaleDateString()}</td>
+            <td>${new Date().toLocaleDateString()}</td>
+            <td class="action-buttons">
+              <button onclick="inventorySystem.toggleItemStatus('PAEQ0001')">Mark Damaged</button>
+              <button onclick="inventorySystem.showLendModal('PAEQ0001')">Lend Out</button>
+              <button onclick="inventorySystem.deleteItem('PAEQ0001')">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+    <div class="card report-section">
+      <h2>Inventory Report</h2>
+      <div class="form-group">
+        <label for="report-start-date">Start Date:</label>
+        <input type="date" id="report-start-date" required>
+      </div>
+      <div class="form-group">
+        <label for="report-end-date">End Date:</label>
+        <input type="date" id="report-end-date" required>
+      </div>
+      <div class="form-group">
+        <label for="report-email">Email Address:</label>
+        <input type="email" id="report-email" required placeholder="Enter your email">
+      </div>
+      <button onclick="inventorySystem.generateReport()">Generate & Send Report</button>
+      <div id="report-status"></div>
+    </div>
+  </div>
+  
+  <div id="locationModal" class="modal">
+    <div class="modal-content">
+      <h2>Select Location</h2>
+      <form id="location-form" onsubmit="inventorySystem.validateLocation(event)">
+        <div class="form-group">
+          <label for="location-select">Choose Location:</label>
+          <select id="location-select" required>
+            <option value="">Select Location</option>
+            <!-- Locations loaded dynamically -->
+            <option value="ICT Unit">ICT Unit</option>
+            <option value="A&HR">A&HR</option>
+            <option value="Public Affairs Unit">Public Affairs Unit</option>
+          </select>
+          <div class="validation-message">Please select a location</div>
+        </div>
+        <div class="form-group">
+          <label for="location-password">Location Password:</label>
+          <input type="password" id="location-password" required>
+          <div class="validation-message">Please enter the location password</div>
+          <a href="#" onclick="inventorySystem.showPasswordRecovery()" class="forgot-password">Forgot Password?</a>
+        </div>
+        <button type="submit">Access Location</button>
+        <button type="button" onclick="inventorySystem.showNewLocationForm()">Add New Location</button>
+      </form>
+    </div>
+  </div>
+  
+  <div id="newLocationModal" class="modal">
+    <div class="modal-content">
+      <h2>Add New Location</h2>
+      <div class="form-group">
+        <label for="new-location-name">Location Name:</label>
+        <input type="text" id="new-location-name" required>
+      </div>
+      <div class="form-group">
+        <label for="new-location-password">Set Password:</label>
+        <input type="password" id="new-location-password" required>
+      </div>
+      <div class="form-group">
+        <label for="confirm-location-password">Confirm Password:</label>
+        <input type="password" id="confirm-location-password" required>
+      </div>
+      <button onclick="inventorySystem.createNewLocation()">Create Location</button>
+      <button onclick="inventorySystem.closeModal('newLocationModal')">Cancel</button>
+    </div>
+  </div>
+  
+  <div id="lendModal" class="modal">
+    <div class="modal-content">
+      <h2>Lend Item</h2>
+      <div class="form-group">
+        <label for="lend-office">Lend to Location:</label>
+        <select id="lend-office" required>
+          <option value="">Select Location</option>
+        </select>
+      </div>
+      <button onclick="inventorySystem.confirmLend()">Confirm</button>
+      <button onclick="inventorySystem.closeModal('lendModal')">Cancel</button>
+    </div>
+  </div>
+  
+  <div id="reportPreviewModal" class="modal">
+    <div class="modal-content" style="max-width: 800px">
+      <h2>Report Preview</h2>
+      <div id="report-preview-content" class="report-preview"></div>
+      <div class="form-group" style="margin-top: 1rem;">
+        <button onclick="inventorySystem.sendReport()">Send Report</button>
+        <button onclick="inventorySystem.closeModal('reportPreviewModal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+  
+  <div id="passwordRecoveryModal" class="modal">
+    <div class="modal-content">
+      <h2>Password Reset</h2>
+      <p>To reset your location's password, please enter the recovery password:</p>
+      <div class="form-group">
+        <label for="recovery-ict-password">Recovery Password:</label>
+        <input type="password" id="recovery-ict-password" required>
+      </div>
+      <div class="form-group">
+        <label for="recovery-location">Location:</label>
+        <select id="recovery-location" required>
+          <option value="">Select Location</option>
+          <option value="ICT Unit">ICT Unit</option>
+          <option value="A&HR">A&HR</option>
+          <option value="Public Affairs Unit">Public Affairs Unit</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="new-recovery-password">New Password:</label>
+        <input type="password" id="new-recovery-password" required>
+      </div>
+      <div class="form-group">
+        <label for="confirm-recovery-password">Confirm New Password:</label>
+        <input type="password" id="confirm-recovery-password" required>
+      </div>
+      <button onclick="inventorySystem.recoverPassword()">Reset Password</button>
+      <button onclick="inventorySystem.closeModal('passwordRecoveryModal')">Cancel</button>
+    </div>
+  </div>
+  <script src="./script.js"></script>
+  </body>
+  </html>
